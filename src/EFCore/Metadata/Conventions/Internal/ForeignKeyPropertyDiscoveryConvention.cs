@@ -49,6 +49,11 @@ namespace Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal
         {
             relationshipBuilder = DiscoverProperties(relationshipBuilder);
 
+            if (relationshipBuilder.Metadata.DeclaringEntityType.GetForeignKeysInHierarchy().Count() < 2)
+            {
+                return relationshipBuilder;
+            }
+
             var fksToProcess = relationshipBuilder.Metadata.DeclaringEntityType.GetForeignKeysInHierarchy()
                 .Where(fk => fk != relationshipBuilder.Metadata)
                 .ToList();
@@ -319,14 +324,6 @@ namespace Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal
             if (TryFindMatchingProperties(foreignKey, entityTypeToReference.ShortName(), onDependent, matchPk, out match))
             {
                 return match;
-            }
-
-            if (!matchPk)
-            {
-                if (TryFindMatchingProperties(foreignKey, "", onDependent, false, out match))
-                {
-                    return match;
-                }
             }
 
             return match;
